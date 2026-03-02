@@ -6,7 +6,9 @@
       "a_raw": "Diversity",
       "b_raw": "women",
       "a_count": 9,
-      "b_count": 6
+      "b_count": 6,
+      "class": "navy"
+      
     },
     {
       "a": "DIVERSITY",
@@ -14,7 +16,8 @@
       "a_raw": "Diversity",
       "b_raw": "racial minorities",
       "a_count": 9,
-      "b_count": 1
+      "b_count": 1,
+      "class": "navy"
     },
     {
       "a": "ACCESS",

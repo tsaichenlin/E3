@@ -2,6 +2,18 @@
 /* global image, millis, noStroke, fill, width, height, push, pop, textSize, translate */
 /* global textAlign, CENTER, text, rect, map, constrain, BOLD, NORMAL, textStyle, textWidth */
 
+
+// Palette (use only these)
+const PALETTE = {
+  goldDark: "#B3A369",
+  navy: "#003057",
+  white: "#FFFFFF",
+  cream: "#F9F6E5",
+  gray: "#54585A",
+  sage: "#D6DBD4",
+  gold: "#EAAA00",
+};
+
 let buzzwordPairsRaw;
 let buzzwordPairs = []; // [{a,b,a_count,b_count}, ...]
 
@@ -16,17 +28,9 @@ let scatterCache = new Map();
 
 // Timing
 const INTRO_PORTION = 0.075; // fraction of TOTAL_MS reserved for the intro title card
+const slots = pairs.length * 2;
+const seg = 1 / slots;
 
-// Palette (use only these)
-const PALETTE = {
-  goldDark: "#B3A369",
-  navy: "#003057",
-  white: "#FFFFFF",
-  cream: "#F9F6E5",
-  gray: "#54585A",
-  sage: "#D6DBD4",
-  gold: "#EAAA00",
-};
 
 function hexToRgb(hex) {
   const h = hex.replace("#", "").trim();
@@ -61,13 +65,16 @@ function windowResized() {
 }
 
 function draw() {
-  image(bg, 0, 0);
 
   const tGlobal = (millis() - startMs) % TOTAL_MS;
   const introMs = TOTAL_MS * INTRO_PORTION;
 
   if (tGlobal < introMs) {
     const p = tGlobal / introMs;
+  
+    // Clear background during intro
+    background(...rgb(PALETTE.goldDark));
+  
     drawIntro(p);
     return;
   }
@@ -118,20 +125,61 @@ function drawBuzzwordPairsSequence(p) {
   const pairs = buzzwordPairs;
   if (!pairs.length) return;
 
-  const slots = pairs.length * 2;
-  const seg = 1 / slots;
-  const idx = Math.min(slots - 1, Math.floor(constrain(p, 0, 0.999999) / seg));
-  const tSeg = (p - idx * seg) / seg; // 0..1
+  // A is faster, B is slower
+  const weightA = 1;
+  const weightB = 1.6; // <-- B slower (increase to make even slower)
 
-  const pairIdx = Math.floor(idx / 2);
-  const isB = idx % 2 === 1;
-  const word = (isB ? pairs[pairIdx].b : pairs[pairIdx].a).toUpperCase();
-  const countRaw = isB ? pairs[pairIdx].b_count : pairs[pairIdx].a_count;
+  const segments = [];
+
+  for (let i = 0; i < pairs.length; i++) {
+    segments.push({
+      pairIdx: i,
+      isB: false,
+      weight: weightA,
+    });
+    segments.push({
+      pairIdx: i,
+      isB: true,
+      weight: weightB,
+    });
+  }
+
+  const totalWeight = segments.reduce((s, seg) => s + seg.weight, 0);
+
+  let cumulative = 0;
+  let activeSeg = null;
+
+  for (let seg of segments) {
+    const start = cumulative / totalWeight;
+    cumulative += seg.weight;
+    const end = cumulative / totalWeight;
+
+    if (p >= start && p < end) {
+      activeSeg = {
+        ...seg,
+        localP: (p - start) / (end - start),
+      };
+      break;
+    }
+  }
+
+  if (!activeSeg) return;
+
+  const pair = pairs[activeSeg.pairIdx];
+  const word = (activeSeg.isB ? pair.b : pair.a).toUpperCase();
+  const countRaw = activeSeg.isB ? pair.b_count : pair.a_count;
   const count = Math.max(1, Math.floor(countRaw || 0));
 
-  const a = Math.floor(255 * segmentAlpha(tSeg));
+  //  Background swap 
+  const bgColor = activeSeg.isB
+    ? PALETTE.navy
+    : PALETTE.goldDark;
 
-  drawCountScatterWordBuild(word, count, a, tSeg);
+  background(...rgb(bgColor));
+
+  const a = Math.floor(255 * segmentAlpha(activeSeg.localP));
+
+  drawCountScatterWordBuild(word, count, a, activeSeg.localP);
 }
 
 function drawCountScatterWordBuild(word, count, alpha255, tSeg) {
