@@ -16,10 +16,6 @@ body {
     sans-serif;
 }
 
-/* Navy Blue Background */
-body.navy {
-  background: #003057; 
-}
 
 canvas {
   display: block;
