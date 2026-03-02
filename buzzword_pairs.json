@@ -1,0 +1,88 @@
+{
+  "pairs": [
+    {
+      "a": "DIVERSITY",
+      "b": "WOMEN",
+      "a_raw": "Diversity",
+      "b_raw": "women",
+      "a_count": 9,
+      "b_count": 6
+    },
+    {
+      "a": "DIVERSITY",
+      "b": "RACIAL MINORITIES",
+      "a_raw": "Diversity",
+      "b_raw": "racial minorities",
+      "a_count": 9,
+      "b_count": 1
+    },
+    {
+      "a": "ACCESS",
+      "b": "LOW-INCOME STUDENTS",
+      "a_raw": "Access",
+      "b_raw": "low-income students",
+      "a_count": 18,
+      "b_count": 1
+    },
+    {
+      "a": "ACCESS",
+      "b": "RURAL COMMUNITIES",
+      "a_raw": "Access",
+      "b_raw": "rural communities",
+      "a_count": 18,
+      "b_count": 1
+    },
+    {
+      "a": "INNOVATION",
+      "b": "SUSTAINABILITY",
+      "a_raw": "Innovation",
+      "b_raw": "sustainability",
+      "a_count": 33,
+      "b_count": 16
+    },
+    {
+      "a": "GLOBAL",
+      "b": "INTERNATIONAL",
+      "a_raw": "Global",
+      "b_raw": "international",
+      "a_count": 45,
+      "b_count": 8
+    },
+    {
+      "a": "LEADERSHIP",
+      "b": "HUMANITIES",
+      "a_raw": "Leadership",
+      "b_raw": "humanities",
+      "a_count": 29,
+      "b_count": 3
+    },
+    {
+      "a": "WELL-BEING",
+      "b": "MENTAL HEALTH",
+      "a_raw": "Well-being",
+      "b_raw": "mental health",
+      "a_count": 25,
+      "b_count": 0
+    }
+  ],
+  "counts": {
+    "Diversity": 9,
+    "women": 6,
+    "racial minorities": 1,
+    "Access": 18,
+    "low-income students": 1,
+    "rural communities": 1,
+    "Inclusive": 15,
+    "underrepresented groups": 0,
+    "Innovation": 33,
+    "sustainability": 16,
+    "Global": 45,
+    "international": 8,
+    "Leadership": 29,
+    "humanities": 3,
+    "Entrepreneurship": 14,
+    "minority entrepreneurs": 2,
+    "Well-being": 25,
+    "mental health": 0
+  }
+}

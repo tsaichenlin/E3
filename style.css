@@ -1,0 +1,33 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #eaaa00;
+  color: #ffffff;
+  height: 100%;
+  overflow: hidden;
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+#hint {
+  position: fixed;
+  left: 12px;
+  bottom: 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  opacity: 0.55;
+  user-select: none;
+  pointer-events: none;
+  color: #f9f6e5;
+}
