@@ -28,8 +28,6 @@ let scatterCache = new Map();
 
 // Timing
 const INTRO_PORTION = 0.075; // fraction of TOTAL_MS reserved for the intro title card
-const slots = pairs.length * 2;
-const seg = 1 / slots;
 
 
 function hexToRgb(hex) {
@@ -122,8 +120,13 @@ function normalizeBuzzwordPairs(data) {
 }
 
 function drawBuzzwordPairsSequence(p) {
+
+
   const pairs = buzzwordPairs;
   if (!pairs.length) return;
+  const slots = pairs.length * 2;
+ const seg = 1 / slots;
+
 
   // A is faster, B is slower
   const weightA = 1;
@@ -183,7 +186,6 @@ function drawBuzzwordPairsSequence(p) {
 }
 
 function drawCountScatterWordBuild(word, count, alpha255, tSeg) {
-  // More-even spacing: grid cells + randomized fill order (still deterministic).
   const marginX = Math.max(22, width * 0.06);
   const marginTop = Math.max(88, height * 0.19);
   const marginBottom = Math.max(42, height * 0.16);
@@ -200,34 +202,28 @@ function drawCountScatterWordBuild(word, count, alpha255, tSeg) {
   const cellW = areaW / cols;
   const cellH = areaH / rows;
 
-  // Fit font inside a cell.
+  // Fit font inside a cell, scale to longest word in this "grid"
   let fs = Math.min(cellH * 0.62, 60);
   fs = Math.max(8, fs);
 
-  push();
-  textAlign(CENTER, CENTER);
-  textStyle(BOLD);
-
-  // Shrink if word would overflow the cell width.
+  // Iteratively shrink font until it fits the cell width
   for (let attempt = 0; attempt < 10; attempt++) {
     textSize(fs);
     const wWord = textWidth(word);
-    if (wWord <= cellW * 0.9) break;
+    if (wWord <= cellW * 0.9) break; // fits nicely
     fs = Math.max(7, fs * 0.88);
   }
 
-  // Deterministic shuffle over the *entire* grid so the right side gets used.
+  // Deterministic shuffle of grid cells
   const rand = mulberry32(hashStringFNV1a(`GRID:${word}`));
   const totalCells = rows * cols;
   const order = Array.from({ length: totalCells }, (_, i) => i);
   for (let i = totalCells - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
-    const tmp = order[i];
-    order[i] = order[j];
-    order[j] = tmp;
+    [order[i], order[j]] = [order[j], order[i]];
   }
 
-  // Build up one-by-one, then hold.
+  // Build-up animation
   const buildPortion = 0.78;
   const pBuild = tSeg <= 0 ? 0 : Math.min(1, tSeg / buildPortion);
   const buildN = pBuild * n;
@@ -236,45 +232,37 @@ function drawCountScatterWordBuild(word, count, alpha255, tSeg) {
   const shown = Math.min(n, fullShown + (frac > 0.00001 ? 1 : 0));
   const newestAlpha = easeInOutCubic(frac);
 
-  noStroke();
+  push();
+  textAlign(CENTER, CENTER);
+  textStyle(BOLD);
   textSize(fs);
+  noStroke();
 
-  for (let k = 0; k < shown; k++) {
-    const cellIdx = order[k];
+  for (let i = 0; i < shown; i++) {
+    const cellIdx = order[i % order.length];
     const c = cellIdx % cols;
     const r = Math.floor(cellIdx / cols);
     const cx = marginX + c * cellW + cellW / 2;
     const cy = marginTop + r * cellH + cellH / 2;
 
-    // Slight scatter within the cell so rows don't align perfectly.
-    const jitterRand = mulberry32(hashStringFNV1a(`${word}:${cellIdx}`));
-    const jx = (jitterRand() - 0.5) * cellW * 0.22;
-    const jy = (jitterRand() - 0.5) * cellH * 0.38;
-    const x = cx + jx;
-    const y = cy + jy;
+    const isNewest = i === shown - 1 && frac > 0.00001;
+    const a = isNewest ? Math.floor(alpha255 * newestAlpha) : Math.floor(alpha255 * 0.92);
 
-    const isNewest = k === shown - 1 && frac > 0.00001;
-    const a = isNewest
-      ? Math.floor(alpha255 * newestAlpha)
-      : Math.floor(alpha255 * 0.92);
-
-    fill(...rgb(PALETTE.white), a);
-    text(word, x, y);
+    fill(...rgb(PALETTE.white), a); // default white, caller can change to gold/navy
+    text(word, cx, cy);
   }
 
-  // Top caption with total count.
+  // Top caption with total count
   textStyle(NORMAL);
   textSize(24);
   fill(...rgb(PALETTE.white), Math.floor(alpha255 * 0.95));
   textAlign(CENTER, CENTER);
-  // Simulate a "medium" weight (bolder than NORMAL, lighter than BOLD).
   const cap = `${n} TIMES IN GT STRATEGIC PLAN`;
   text(cap, width / 2, 54);
   text(cap, width / 2 + 0.7, 54);
 
   pop();
 }
-
 function drawContradictions(p) {
   // Each pair: show A then B back-to-back.
   const n = contradictions.length;
